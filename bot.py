@@ -32,8 +32,6 @@ async def on_message(message):
     if message.author == client.user:
         return
     if message.attachments and message.content.startswith('/upload'):
-        await message.channel.send("Llego un file!")
-
         try:
             nameToSave = get_filename(message.content, 8)
         except:
@@ -41,6 +39,8 @@ async def on_message(message):
         
         await message.attachments[0].save(f'files/{nameToSave}')
         upload(nameToSave, str(message.channel.id))
+        await message.channel.send("Archivo subido!")
+
 
     if message.content.startswith('/add'):
         add_folder(str(message.channel.id), get_filename(message.content, 5))
