@@ -4,7 +4,8 @@ import os
 import discord
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-
+from uploader import upload, add_folder, save_folderIds
+import json
 
 gauth = GoogleAuth()           
 drive = GoogleDrive(gauth) 
@@ -14,14 +15,13 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
+    
+def get_filename(text, offset):
+    if offset > len(text):
+        raise Exception('Offset longer than str length')
+    return text[offset:]
 
-def upload():
-    upload_file_list = ['1.jpg', '2.jpg']
-    for upload_file in upload_file_list:
-        gfile = drive.CreateFile({'parents': [{'id': '1pzschX3uMbxU0lB5WZ6IlEEeAUE8MZ-t'}]})
-        # Read file and set it as the content of this instance.
-        gfile.SetContentFile(upload_file)
-        gfile.Upload() # Upload the file.
+folder_ids= {}
 
 @client.event
 async def on_ready(): 
@@ -31,8 +31,24 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    if message.attachments:
+    if message.attachments and message.content.startswith('/upload'):
         await message.channel.send("Llego un file!")
+
+        try:
+            nameToSave = get_filename(message.content, 8)
+        except:
+            nameToSave = message.attachments[0].filename
+        
+        await message.attachments[0].save(f'files/{nameToSave}')
+        upload(nameToSave, str(message.channel.id))
+
+    if message.content.startswith('/add'):
+        add_folder(str(message.channel.id), get_filename(message.content, 5))
+        print(message.channel.name, "has been saved in folderIds as", message.channel.id)
+    
+
+    if message.content.startswith('/save'):
+        save_folderIds()
 
 
     if message.content.startswith('hello!'):

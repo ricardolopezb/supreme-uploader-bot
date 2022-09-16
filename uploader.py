@@ -1,34 +1,43 @@
+from matplotlib.font_manager import json_load
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
-import os, glob
+import os
+import json
 
 
 gauth = GoogleAuth()           
 drive = GoogleDrive(gauth) 
 
+folderIds = {}
 
-def upload():
-    # upload_file_list = ['SQL.pdf']
-    # for upload_file in upload_file_list:
-    #     gfile = drive.CreateFile({'parents': [{'id': '1oSOvj_obkaEec6v1BNhN7XtVX_0YplfN-t'}]})
-    #     # Read file and set it as the content of this instance.
-    #     gfile.SetContentFile(upload_file)
-    #     gfile.Upload() # Upload the file.
+def open_folderId():
+    with open('ids.json', 'r') as fp:
+        folderIds = json.load(fp)
 
-    # with open("SQL.pdf","r") as file:
-    #     file_drive = drive.CreateFile({'title':os.path.basename(file.name) })  
-    #     file_drive.SetContentString(file.read()) 
-    #     file_drive.Upload()
+def save_folderIds():
+    with open('ids.json', 'w') as fp:
+        json.dump(folderIds, fp)
+    print("New IDs were saved.")
 
-    # folder_id = '1oSOvj_obkaEec6v1BNhN7XtVX_0YplfN-t'
-    # f = drive.CreateFile({'title': 'testing_pdf',
-    #                     'mimeType': 'application/pdf',
-    #                     'parents': [{'kind': 'drive#fileLink','id':folder_id}]})
-    # f.SetContentFile('SQL.pdf')
-    # f.Upload()
-    file1 = drive.CreateFile({'title': 'SQL.pdf'})
-    file1.SetContentFile('SQL.pdf')
+def add_folder(new_channel_id, drive_folder_id):
+    if len(folderIds) == 0: open_folderId()
+    folderIds[new_channel_id] = drive_folder_id
+
+
+def upload(filename, channelId):
+    with open('ids.json', 'r') as fp:
+        folderIds = json.load(fp)
+    print("upload filename", filename)
+
+    folderId = folderIds[channelId]
+    file1 = drive.CreateFile({
+        'title': filename, 
+        'parents':[
+            {'kind': 'drive#fileLink', 
+            'id':folderId 
+            }]
+        })
+    file1.SetContentFile(f'files/{filename}')
     file1.Upload() # Upload the file.
 
-upload()
 
