@@ -22,6 +22,7 @@ def get_filename(text, offset):
 
 folder_ids= {}
 #folder_ids = json.load(open('folderIds.json', 'r'))
+#dawdawdwadawd
 @client.event
 async def on_ready(): 
     print(f'Ready! 🚀\nWe have logged in as {client.user}')
